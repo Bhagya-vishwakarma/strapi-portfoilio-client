@@ -1,19 +1,29 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 
-try {
-  const response = await axios.get(`${process.env.NEXT_PUBLIC_STRAPI_URL}/side-bar-content`)
-  var allSideBaritems = response.data.data.SideBar.split(',');
-}
-catch (error) {
-  console.error("Error fetching Side bar Items:", error);
-}
+
 
 const Sidebar = () => {
-  const [selectedTab, setSelectedTab] = useState(allSideBaritems[1])
+  const [selectedTab, setSelectedTab] = useState();
+  const [allSideBarItems, setAllSideBarItems] = useState()
   const router = useRouter()
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_STRAPI_URL}/side-bar-content`)
+        setAllSideBarItems(response.data.data.SideBar.split(','));
+        setSelectedTab(response.data.data.SideBar.split(',')[1]);
+      }
+      catch (error) {
+        console.error("Error fetching Side bar Items:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+ 
 
   return (
     <div className="fixed md:flex bottom-0 md:top-0 left-0 z-30 h-16 md:h-screen w-full md:w-64 bg-[var(--secondary)] text-[var(--primary)]">
@@ -22,7 +32,7 @@ const Sidebar = () => {
         <nav className="h-full">
           <ul className="flex justify-around md:justify-start items-center md:items-start md:flex-col h-full md:p-4 md:gap-4">
             {
-              allSideBaritems.map((item) => {
+              allSideBarItems&&allSideBarItems.map((item) => {
                 return (
                   <li
                     key={item}
